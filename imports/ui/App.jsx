@@ -1,9 +1,11 @@
-import React, { Component,PropTypes } from 'react';
-import { createContainer } from 'meteor/react-meteor-data';
+import React, {Component, PropTypes} from 'react';
+import {createContainer} from 'meteor/react-meteor-data';
 import ReactDOM from 'react-dom';
+import { Meteor } from 'meteor/meteor';
 
 import Task from './Task.jsx';
-import { Tasks } from '../api/tasks.js'; // the data model
+import {Tasks} from '../api/tasks.js'; // the data model
+import AccountsUIWrapper from './AccountsUIWrapper.jsx';
 
 // App component - represents the whole app
 class App extends Component {
@@ -21,9 +23,10 @@ class App extends Component {
             filteredTasks = filteredTasks.filter(task => !task.checked);
         }
         return filteredTasks.map((task) => (
-            <Task key={task._id} task={task} />
+            <Task key={task._id} task={task}/>
         ));
     }
+
     handleSubmit(event) {
         event.preventDefault();
 
@@ -33,11 +36,14 @@ class App extends Component {
         Tasks.insert({
             text,
             createdAt: new Date(), // current time
+            owner: Meteor.userId(),           // _id of logged in user
+            username: Meteor.user().username,  // username of logged in user
         });
 
         // Clear form
         ReactDOM.findDOMNode(this.refs.textInput).value = '';
     }
+
     toggleHideCompleted() {
         this.setState({
             hideCompleted: !this.state.hideCompleted,
@@ -47,9 +53,10 @@ class App extends Component {
     render() {
         return (
             <div className="container">
-              <header>
-                <h1>Todo List  ({this.props.incompleteCount})</h1>
-              </header>
+                <header>
+                    <h1>Todo List ({this.props.incompleteCount})</h1>
+                </header>
+                <AccountsUIWrapper />
                 <label className="hide-completed">
                     <input
                         type="checkbox"
@@ -59,7 +66,7 @@ class App extends Component {
                     />
                     Hide Completed Tasks
                 </label>
-                <form className="new-task" onSubmit={this.handleSubmit.bind(this)} >
+                <form className="new-task" onSubmit={this.handleSubmit.bind(this)}>
                     <input
                         type="text"
                         ref="textInput"
@@ -67,9 +74,9 @@ class App extends Component {
                     />
                 </form>
 
-              <ul>
-                  {this.renderTasks()}
-              </ul>
+                <ul>
+                    {this.renderTasks()}
+                </ul>
             </div>
         );
     }
@@ -83,7 +90,7 @@ App.propTypes = {
 // what to pass as prop
 export default createContainer(() => {
     return {
-        tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch(),
-        incompleteCount: Tasks.find({ checked: { $ne: true } }).count(),
+        tasks: Tasks.find({}, {sort: {createdAt: -1}}).fetch(),
+        incompleteCount: Tasks.find({checked: {$ne: true}}).count(),
     };
 }, App);
