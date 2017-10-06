@@ -3,7 +3,7 @@ import { createContainer } from 'meteor/react-meteor-data';
 import ReactDOM from 'react-dom';
 
 import Task from './Task.jsx';
-import { Tasks } from '../api/tasks.js';
+import { Tasks } from '../api/tasks.js'; // the data model
 
 // App component - represents the whole app
 class App extends Component {
